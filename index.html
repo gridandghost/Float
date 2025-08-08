@@ -1,12 +1,568 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My GitHub Pages Site</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Standup Builder</title>
+  <style>
+    :root { --pad: 10px; --gap: 12px; --bg:#0f172a; --card:#111827; --ink:#e5e7eb; --muted:#94a3b8; --accent:#22c55e; }
+    * { box-sizing: border-box; }
+    body { margin:0; font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; background:var(--bg); color:var(--ink); }
+    .wrap { max-width: 1040px; margin: 30px auto; padding: 0 16px; }
+    h1 { font-size: 22px; margin: 0 0 16px; }
+    h2 { font-size: 16px; margin: 0 0 12px; color: var(--muted); font-weight:600; letter-spacing:.4px }
+    .row { display: grid; grid-template-columns: 1fr 1fr; gap: var(--gap); }
+    @media (max-width: 900px){ .row { grid-template-columns: 1fr; } }
+    .card { background: var(--card); border: 1px solid rgba(255,255,255,.06); border-radius: 12px; padding: 14px; box-shadow: 0 10px 24px rgba(0,0,0,.25); }
+    label { font-size: 12px; color: var(--muted); display:block; margin: 12px 0 6px; }
+    select, input[type="text"], textarea { width: 100%; padding: 9px 10px; border-radius: 10px; border:1px solid rgba(255,255,255,.12); background:#0b1022; color:var(--ink); outline:none; }
+    textarea { min-height: 80px; resize: vertical; }
+    .row-3 { display:grid; grid-template-columns: 1fr 1fr 1fr; gap: var(--gap); }
+    .row-2 { display:grid; grid-template-columns: 1fr 1fr; gap: var(--gap); }
+    .pill { display:inline-flex; align-items:center; gap:8px; padding:8px 12px; background:#0b1022; border:1px solid rgba(255,255,255,.10); border-radius:999px; font-size:12px; margin:4px 6px 0 0 }
+    .btn { cursor:pointer; border:1px solid rgba(255,255,255,.18); background:#0b1022; color:var(--ink); padding:10px 12px; border-radius:10px; font-weight:600; }
+    .btn:hover { border-color: rgba(255,255,255,.28); }
+    .btn.accent { background: var(--accent); color:#08110a; border:none; }
+    .stack { display:flex; gap:10px; flex-wrap:wrap }
+    .items { margin-top: 8px; }
+    .items li { list-style:none; padding:8px 10px; border:1px solid rgba(255,255,255,.08); border-radius:10px; margin-top:8px; background:#0b1022; display:flex; align-items:center; justify-content:space-between; gap:8px; }
+    .items small { color: var(--muted); }
+    .items button { font-size:12px; padding:6px 8px }
+    .muted { color: var(--muted); font-size: 12px; margin-top: 8px; }
+    pre { white-space: pre-wrap; word-break: break-word; background:#0b1022; border:1px solid rgba(255,255,255,.10); padding:12px; border-radius:10px; }
+    .inline-note{font-size:12px;color:var(--muted)}
+    .test { margin-top: 16px; }
+    .test-pass { color: #22c55e; }
+    .test-fail { color: #ef4444; }
+  </style>
 </head>
 <body>
-    <h1>Welcome to my GitHub Pages!</h1>
-    <p>This is a simple example of an index.html file.</p>
+  <div class="wrap">
+    <h1>Standup Builder</h1>
+    <div class="row">
+      <!-- Yesterday column -->
+      <div class="card">
+        <h2>What did you do <strong>yesterday</strong>?</h2>
+        <div class="row-3">
+          <div>
+            <label>Type</label>
+            <select id="y-type">
+              <option value="ticket">Ticket</option>
+              <option value="update">Update (tech debt)</option>
+              <option value="meeting">Meeting</option>
+              <option value="ping">Ping</option>
+            </select>
+          </div>
+          <div>
+            <label id="y-ident-label">Ticket number</label>
+            <input id="y-ident" type="text" placeholder="예) UX-123" />
+          </div>
+          <div id="y-status-wrap">
+            <label id="y-status-label">Status</label>
+            <select id="y-status">
+              <option value="wireframing">Wireframing</option>
+              <option value="mocking up">Mocking up</option>
+              <option value="sent for review">Sent for review</option>
+              <option value="paused by">Paused by…</option>
+              <option value="delivered">Delivered</option>
+              <option value="optimized for speed">Optimized for speed</option>
+              <option value="made clearer">Made clearer</option>
+              <option value="fixed naming/layers">Fixed naming/layers</option>
+              <option value="other">Other…</option>
+            </select>
+          </div>
+        </div>
+        <div class="row-2" id="y-conditional-row" style="margin-top:12px">
+          <div id="y-extra-wrap">
+            <label id="y-extra-label">Detail</label>
+            <input id="y-extra" type="text" placeholder="예) Reviewer / Blocker" />
+          </div>
+          <div id="y-why-wrap" style="display:none">
+            <label>Why updated?</label>
+            <select id="y-why">
+              <option value="speed">Make it work faster</option>
+              <option value="clarity">Make it clearer</option>
+              <option value="naming">Official naming / layers</option>
+              <option value="fixing others' edits">Fixing mistakes from previous edits</option>
+              <option value="surpassed ux knowledge">Updated status that surpasses prior UX knowledge</option>
+              <option value="other">Other…</option>
+            </select>
+          </div>
+        </div>
+        <!-- Meeting controls (y) injected here -->
+        <div class="stack" style="margin-top: 12px;">
+          <button class="btn" id="y-clear">Clear</button>
+          <button class="btn" id="y-add">Add to Yesterday</button>
+        </div>
+        <ul class="items" id="y-list"></ul>
+        <div class="muted">Tip: Add items as you go through the day so 8am is just a readout.</div>
+      </div>
+
+      <!-- Today column -->
+      <div class="card">
+        <h2>What are you doing <strong>today</strong>?</h2>
+        <div class="row-3">
+          <div>
+            <label>Type</label>
+            <select id="t-type">
+              <option value="ticket">Ticket</option>
+              <option value="update">Update (tech debt)</option>
+              <option value="meeting">Meeting</option>
+              <option value="ping">Ping</option>
+            </select>
+          </div>
+          <div>
+            <label id="t-ident-label">Ticket number</label>
+            <input id="t-ident" type="text" placeholder="예) UX-456" />
+          </div>
+          <div id="t-status-wrap">
+            <label id="t-status-label">Status</label>
+            <select id="t-status">
+              <option value="wireframing">Wireframing</option>
+              <option value="mocking up">Mocking up</option>
+              <option value="sending for review">Sending for review</option>
+              <option value="blocked by">Blocked by…</option>
+              <option value="delivering">Delivering</option>
+              <option value="optimizing for speed">Optimizing for speed</option>
+              <option value="clarifying">Clarifying</option>
+              <option value="fixing naming/layers">Fixing naming/layers</option>
+              <option value="researching">Researching…</option>
+              <option value="other">Other…</option>
+            </select>
+          </div>
+        </div>
+        <div class="row-2" id="t-conditional-row" style="margin-top:12px">
+          <div id="t-extra-wrap">
+            <label id="t-extra-label">Detail</label>
+            <input id="t-extra" type="text" placeholder="예) ping by EOD" />
+          </div>
+          <div id="t-why-wrap" style="display:none">
+            <label>Why updating?</label>
+            <select id="t-why">
+              <option value="speed">Make it work faster</option>
+              <option value="clarity">Make it clearer</option>
+              <option value="naming">Official naming / layers</option>
+              <option value="fixing others' edits">Fixing mistakes from previous edits</option>
+              <option value="scope">Clarify scope / requirements</option>
+              <option value="other">Other…</option>
+            </select>
+          </div>
+        </div>
+        <!-- Meeting controls (t) injected here -->
+        <div class="stack" style="margin-top: 12px;">
+          <button class="btn" id="t-clear">Clear</button>
+          <button class="btn" id="t-add">Add to Today</button>
+        </div>
+        <ul class="items" id="t-list"></ul>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:16px">
+      <div class="stack">
+        <button class="btn" id="reset-all">Reset All</button>
+        <button class="btn accent" id="generate">Generate Standup</button>
+        <button class="btn" id="copy-out">Copy</button>
+      </div>
+      <h2 style="margin-top:12px">Output</h2>
+      <pre id="out"></pre>
+      <div class="muted">The output is saved automatically.</div>
+    </div>
+
+    <div class="card test">
+      <h2>Self‑tests</h2>
+      <button class="btn" id="run-tests">Run self‑tests</button>
+      <div id="test-results" class="muted"></div>
+    </div>
+  </div>
+
+  <script>
+    // --- State ---
+    const state = { yesterday: [], today: [] };
+
+    function $(id){ return document.getElementById(id); }
+
+    // Inject Meeting UI into a section (prefix 'y' or 't')
+    function ensureMeetingUI(prefix){
+      const row = document.getElementById(prefix+'-conditional-row');
+      if(!row) return;
+      if(document.getElementById(prefix+'-meet-wrap')) return; // already added
+
+      const wrap = document.createElement('div');
+      wrap.id = prefix+'-meet-wrap';
+      wrap.style.display = 'none';
+      wrap.style.marginTop = '10px';
+      wrap.innerHTML = `
+        <label>When</label>
+        <div class="stack" style="margin:4px 0 8px">
+          <label class="pill"><input type="radio" name="${prefix}-day" value="today" checked> Today</label>
+          <label class="pill"><input type="radio" name="${prefix}-day" value="tomorrow"> Tomorrow</label>
+          <label class="pill"><input type="radio" name="${prefix}-day" value="later"> Later</label>
+          <input id="${prefix}-day-other" type="text" placeholder="예) 다음 주 수요일" style="display:none; width:180px" />
+        </div>
+        <div class="row-2">
+          <div>
+            <label>Time</label>
+            <select id="${prefix}-time"></select>
+          </div>
+          <div>
+            <label>Other time</label>
+            <input id="${prefix}-time-other" type="text" placeholder="예) 점심 이후" style="display:none" />
+          </div>
+        </div>
+        <label style="margin-top:12px">Purpose</label>
+        <div class="stack" style="margin:4px 0 8px">
+          <label class="pill"><input type="radio" name="${prefix}-purpose-type" value="project" checked> Project</label>
+          <label class="pill"><input type="radio" name="${prefix}-purpose-type" value="file"> File</label>
+        </div>
+        <div id="${prefix}-purpose-project">
+          <label>Project name (optional)</label>
+          <input id="${prefix}-project-name" type="text" placeholder="예) Shiba Inu 온보딩" />
+          <label style="margin-top:8px">For project, select:</label>
+          <div class="stack">
+            <label class="pill"><input type="checkbox" class="${prefix}-pchk" value="go over details"> Go over details</label>
+            <label class="pill"><input type="checkbox" class="${prefix}-pchk" value="ask questions"> Ask questions</label>
+            <label class="pill"><input type="checkbox" class="${prefix}-pchk" value="clarify scope and requirements"> Clarify scope & requirements</label>
+            <label class="pill"><input type="checkbox" class="${prefix}-pchk" value="discuss snag in the road"> Discuss snag in the road</label>
+          </div>
+        </div>
+        <div id="${prefix}-purpose-file" style="display:none; margin-top:8px">
+          <label>File / artifact</label>
+          <input id="${prefix}-file-name" type="text" placeholder="예) design_system_v3.fig" />
+          <label style="margin-top:8px">Purpose details</label>
+          <textarea id="${prefix}-file-notes" placeholder="예) 레이어 이름을 깔끔하게 정리"></textarea>
+        </div>
+      `;
+      row.appendChild(wrap);
+
+      // Fill time dropdown with 8:00–17:00 @ 30m + Other
+      const timeSel = document.getElementById(prefix+'-time');
+      if (timeSel && !timeSel.dataset.filled){
+        const start = 8*60, end = 17*60;
+        for (let m = start; m <= end; m += 30){
+          const h = Math.floor(m/60); const min = m%60; const label = `${(h%12)||12}:${min===0?'00':min}${h<12?'am':'pm'}`;
+          const o = document.createElement('option'); o.value = label; o.textContent = label; timeSel.appendChild(o);
+        }
+        const optOther = document.createElement('option'); optOther.value='other'; optOther.textContent='Other…'; timeSel.appendChild(optOther);
+        timeSel.dataset.filled = '1';
+      }
+
+      const timeOther = document.getElementById(prefix+'-time-other');
+      timeSel && timeSel.addEventListener('change', ()=>{
+        if (timeOther) timeOther.style.display = (timeSel.value==='other') ? '' : 'none';
+      });
+
+      const dayOther = document.getElementById(prefix+'-day-other');
+      wrap.querySelectorAll(`input[name='${prefix}-day']`).forEach(r=>{
+        r.addEventListener('change', e=>{
+          dayOther.style.display = e.target.value==='later'?'block':'none';
+        });
+      });
+
+      // Purpose toggle
+      function togglePurpose(){
+        const val = (wrap.querySelector(`input[name='${prefix}-purpose-type']:checked`)||{}).value;
+        const proj = document.getElementById(prefix+'-purpose-project');
+        const file = document.getElementById(prefix+'-purpose-file');
+        if (val === 'file'){ proj.style.display='none'; file.style.display='block'; }
+        else { proj.style.display='block'; file.style.display='none'; }
+      }
+      wrap.querySelectorAll(`input[name='${prefix}-purpose-type']`).forEach(r=> r.addEventListener('change', togglePurpose));
+      togglePurpose();
+    }
+
+    function updateIdentityLabels(prefix){
+      const type = $(prefix+"-type").value;
+      const identInput = $(prefix+"-ident");
+      const identLabel = $(prefix+"-ident-label");
+      const statusLabel = $(prefix+"-status-label");
+      const statusWrap = $(prefix+"-status-wrap");
+      const whyWrap = $(prefix+"-why-wrap");
+      const extraInput = $(prefix+"-extra");
+      const extraLabel = $(prefix+"-extra-label");
+      const meetWrap = $(prefix+"-meet-wrap");
+
+      if (meetWrap) meetWrap.style.display = 'none';
+      if (whyWrap) whyWrap.style.display = 'none';
+      if (statusWrap) statusWrap.style.display = '';
+
+      if (type === 'ticket') {
+        identLabel.textContent = 'Ticket number';
+        if (identInput) identInput.placeholder = '예) UX-123';
+        statusLabel.textContent = 'Status';
+        if (extraLabel) extraLabel.textContent = 'Detail';
+        if (extraInput) extraInput.placeholder = '예) Reviewer / Blocker';
+      } else if (type === 'update') {
+        identLabel.textContent = 'File / asset updated';
+        if (identInput) identInput.placeholder = '예) Logo_Redesign.fig';
+        statusLabel.textContent = 'Outcome';
+        if (extraLabel) extraLabel.textContent = 'Extra detail (optional)';
+        if (extraInput) extraInput.placeholder = '예) naming cleanup';
+        if (whyWrap) whyWrap.style.display = 'block';
+      } else if (type === 'meeting') {
+        identLabel.textContent = 'Meeting with';
+        if (identInput) identInput.placeholder = '예) Matthew';
+        statusLabel.textContent = 'Purpose (hidden)';
+        if (statusWrap) statusWrap.style.display = 'none';
+        if (extraLabel) extraLabel.textContent = 'Agenda highlight (optional)';
+        if (extraInput) extraInput.placeholder = '예) scope review, risks';
+        ensureMeetingUI(prefix);
+        const mw = $(prefix+'-meet-wrap');
+        if (mw) mw.style.display = 'block';
+      } else if (type === 'ping') {
+        identLabel.textContent = 'Pinging who';
+        if (identInput) identInput.placeholder = '예) Jake from State Farm';
+        statusLabel.textContent = 'About';
+        if (extraLabel) extraLabel.textContent = 'ETA / follow-up (optional)';
+        if (extraInput) extraInput.placeholder = '예) by EOD';
+      }
+    }
+
+    function composeLine(item, tense){
+      const t = item.type, id = item.ident, st = item.status, why = item.why, extra = item.extra;
+      if (t==='ticket') return `${id} — ${st}${extra?` (${extra})`:''}`;
+      if (t==='update') {
+        const whyBit = why?` — ${why}`:'';
+        if (tense==='past') return `Updated ${id}${whyBit}${st?` (${st})`:''}${extra?` — ${extra}`:''}`;
+        return `Updating ${id}${whyBit}${st?` (${st})`:''}${extra?` — ${extra}`:''}`;
+      }
+      if (t==='meeting') {
+        const when = item.when || {}; const day = when.day||''; const time = when.time||''; const whenStr = [day, time].filter(Boolean).join(' ');
+        let purposeStr = '';
+        if (item.purpose){
+          if (item.purpose.type === 'project'){
+            const bits = ['project'];
+            if (item.purpose.project && item.purpose.project.trim()) bits.push(item.purpose.project.trim());
+            if (Array.isArray(item.purpose.actions) && item.purpose.actions.length){ bits.push(item.purpose.actions.join(', ')); }
+            purposeStr = ' — ' + bits.join(' — ');
+          } else if (item.purpose.type === 'file'){
+            const bits = ['file'];
+            if (item.purpose.name && item.purpose.name.trim()) bits.push(item.purpose.name.trim());
+            if (item.purpose.notes && item.purpose.notes.trim()) bits.push(item.purpose.notes.trim());
+            purposeStr = ' — ' + bits.join(' — ');
+          }
+        }
+        if (tense==='past') return `Met with ${id}${whenStr?` — ${whenStr}`:''}${st?` — ${st}`:''}${purposeStr}${extra?` — ${extra}`:''}`;
+        return `Meeting with ${id}${whenStr?` — ${whenStr}`:''}${st?` — ${st}`:''}${purposeStr}${extra?` — ${extra}`:''}`;
+      }
+      if (t==='ping') return `${tense==='past'?'Pinged':'Pinging'} ${id}${st?` about ${st}`:''}${extra?` — ${extra}`:''}`;
+      return '';
+    }
+
+    // Convert items to complete sentences for output
+    function toSentence(item, tense){
+      // Helper to make a natural when-phrase
+      function whenPhrase(when){
+        if (!when) return '';
+        const d = when.day || '';
+        const t = when.time || '';
+        if (d && t) return `${d} at ${t}`;
+        return d || t || '';
+      }
+
+      if (item.type === 'ticket'){
+        const detail = item.extra ? ` (${item.extra})` : '';
+        return (tense==='past')
+          ? `Ticket ${item.ident} was ${item.status}${detail}.`
+          : `I’m working on ticket ${item.ident}; it’s currently ${item.status}${detail}.`;
+      }
+      if (item.type === 'update'){
+        const why = item.why ? ` to ${item.why}` : '';
+        const detail = item.extra ? ` — ${item.extra}` : '';
+        return (tense==='past')
+          ? `I updated ${item.ident}${why}${item.status?` (${item.status})`:''}${detail}.`
+          : `I’m updating ${item.ident}${why}${item.status?` (${item.status})`:''}${detail}.`;
+      }
+      if (item.type === 'meeting'){
+        const wp = whenPhrase(item.when);
+        if (item.purpose && item.purpose.type==='project'){
+          const proj = item.purpose.project ? ` ${item.purpose.project}` : '';
+          const acts = item.purpose.actions && item.purpose.actions.length ? ` — ${item.purpose.actions.join(', ')}` : '';
+          return (tense==='past')
+            ? `I met with ${item.ident}${wp?` ${wp}`:''} to discuss project${proj}${acts}.`
+            : `I’m meeting with ${item.ident}${wp?` ${wp}`:''} to discuss project${proj}${acts}.`;
+        } else if (item.purpose && item.purpose.type==='file'){
+          const name = item.purpose.name ? ` ${item.purpose.name}` : '';
+          const notes = item.purpose.notes ? ` — ${item.purpose.notes}` : '';
+          return (tense==='past')
+            ? `I met with ${item.ident}${wp?` ${wp}`:''} about file${name}${notes}.`
+            : `I’m meeting with ${item.ident}${wp?` ${wp}`:''} about file${name}${notes}.`;
+        }
+        return (tense==='past')
+          ? `I met with ${item.ident}${wp?` ${wp}`:''}.`
+          : `I’m meeting with ${item.ident}${wp?` ${wp}`:''}.`;
+      }
+      if (item.type === 'ping'){
+        const about = item.status ? ` about ${item.status}` : '';
+        const extra = item.extra ? ` — ${item.extra}` : '';
+        return (tense==='past')
+          ? `I pinged ${item.ident}${about}${extra}.`
+          : `I’m pinging ${item.ident}${about}${extra}.`;
+      }
+      return composeLine(item, tense) + '.';
+    }
+
+    function renderLists(){
+      const y = $('y-list'); const t = $('t-list');
+      y.innerHTML = ''; t.innerHTML = '';
+      state.yesterday.forEach((it, i)=>{
+        const li = document.createElement('li');
+        li.innerHTML = `<div><strong>${it.type}</strong> · <small>${composeLine(it,'past')}</small></div>`;
+        const del = document.createElement('button'); del.className='btn'; del.textContent='Remove';
+        del.onclick = ()=>{ state.yesterday.splice(i,1); save(); renderLists(); };
+        li.appendChild(del); y.appendChild(li);
+      });
+      state.today.forEach((it, i)=>{
+        const li = document.createElement('li');
+        li.innerHTML = `<div><strong>${it.type}</strong> · <small>${composeLine(it,'present')}</small></div>`;
+        const del = document.createElement('button'); del.className='btn'; del.textContent='Remove';
+        del.onclick = ()=>{ state.today.splice(i,1); save(); renderLists(); };
+        li.appendChild(del); t.appendChild(li);
+      });
+    }
+
+    function save(){ localStorage.setItem('standup_state', JSON.stringify(state)); }
+    function load(){
+      const raw = localStorage.getItem('standup_state');
+      if (!raw) return; try { const s = JSON.parse(raw); if (s.yesterday && s.today){ state.yesterday = s.yesterday; state.today = s.today; } } catch(e){}
+    }
+
+    function readWhen(prefix){
+      const wrap = $(prefix+'-meet-wrap'); if (!wrap || wrap.style.display==='none') return null;
+      let day = 'today'; wrap.querySelectorAll(`input[name='${prefix}-day']`).forEach(r=>{ if(r.checked) day = r.value; });
+      if (day==='later'){ const later = $(prefix+'-day-other'); if (later && later.value.trim()) day = later.value.trim(); }
+      let time = ''; const timeSel = $(prefix+'-time'); if (timeSel){ const v = timeSel.value; if (v==='other'){ const ot = $(prefix+'-time-other'); if (ot && ot.value.trim()) time = ot.value.trim(); } else if (v) time = v; }
+      return { day, time };
+    }
+
+    function readPurpose(prefix){
+      const wrap = $(prefix+'-meet-wrap'); if (!wrap || wrap.style.display==='none') return null;
+      const type = (wrap.querySelector(`input[name='${prefix}-purpose-type']:checked`)||{}).value || 'project';
+      if (type==='project'){
+        const project = ($(prefix+'-project-name')||{}).value || '';
+        const actions = Array.from(wrap.querySelectorAll('.'+prefix+'-pchk:checked')).map(x=>x.value);
+        return { type:'project', project, actions };
+      } else {
+        const name = ($(prefix+'-file-name')||{}).value || '';
+        const notes = ($(prefix+'-file-notes')||{}).value || '';
+        return { type:'file', name, notes };
+      }
+    }
+
+    function bindSection(prefix, listKey){
+      const type = $(prefix+'-type');
+      const ident = $(prefix+'-ident');
+      const status = $(prefix+'-status');
+      const why = $(prefix+'-why');
+      const extra = $(prefix+'-extra');
+      const addBtn = $(prefix+'-add');
+      const clrBtn = $(prefix+'-clear');
+
+      // populate meeting UI scaffolds
+      ensureMeetingUI(prefix);
+
+      function addItem(){
+        if (type.value==='meeting'){
+          if (!ident.value.trim()) { ident.focus(); return; }
+          const item = { type: 'meeting', ident: ident.value.trim(), status: '', extra: extra.value.trim() };
+          const when = readWhen(prefix); if (when) item.when = when;
+          const purpose = readPurpose(prefix); if (purpose) item.purpose = purpose;
+          state[listKey].push(item);
+        } else {
+          if (!ident.value.trim()) { ident.focus(); return; }
+          const item = { type: type.value, ident: ident.value.trim(), status: status.value, why: (why? why.value : ''), extra: extra.value.trim() };
+          state[listKey].push(item);
+        }
+        ident.value = ''; extra.value=''; if (why) why.value='speed';
+        save(); renderLists();
+      }
+
+      addBtn.onclick = addItem;
+      clrBtn.onclick = ()=>{ ident.value=''; extra.value=''; if (why) why.value='speed'; };
+      type.onchange = ()=> updateIdentityLabels(prefix);
+      updateIdentityLabels(prefix);
+    }
+
+    function generateOutput(){
+      const yLines = state.yesterday.map(x=>toSentence(x,'past')).join('\n');
+      const tLines = state.today.map(x=>toSentence(x,'present')).join('\n');
+      const txt = `What Happened:\n${yLines || '- (no entries)'}\n\nWhat's Happening Today:\n${tLines || '- (no entries)'}`;
+      $('out').textContent = txt; localStorage.setItem('standup_out', txt);
+    }
+
+    function copyOutput(){
+      const txt = $('out').textContent || '';
+      if (!navigator.clipboard){
+        const ta = document.createElement('textarea');
+        ta.value = txt; document.body.appendChild(ta); ta.select();
+        try { document.execCommand('copy'); } catch(e){}
+        document.body.removeChild(ta);
+      } else {
+        navigator.clipboard.writeText(txt).catch(()=>{});
+      }
+    }
+
+    // --- Self tests ---
+    function runSelfTests(){
+      const resultsEl = $('test-results');
+      const logs = [];
+      function ok(name, cond){ logs.push(`<div class="${cond?'test-pass':'test-fail'}">${cond?'✓':'✗'} ${name}</div>`); }
+
+      // Preserve existing state & output
+      const backupState = JSON.stringify(state);
+      const backupOut = $('out').textContent;
+
+      // Test 1: composeLine ticket
+      const ticket = { type:'ticket', ident:'123', status:'sent for review', extra:'with Sam' };
+      ok('composeLine(ticket,past) formats', composeLine(ticket,'past').includes('123 — sent for review'));
+
+      // Test 2: meeting with project purpose & day/time
+      const meeting = { type:'meeting', ident:'Jake', status:'review scope', when:{day:'tomorrow', time:'2:30pm'}, purpose:{type:'project', project:'Rubicon', actions:['clarify scope and requirements','discuss snag in the road']} };
+      ok('composeLine(meeting,present) includes day/time', composeLine(meeting,'present').includes('tomorrow 2:30pm'));
+      ok('composeLine(meeting,present) includes purpose', composeLine(meeting,'present').includes('project — Rubicon'));
+
+      // Test 3: generateOutput newline correctness
+      state.yesterday = [ticket];
+      state.today = [meeting];
+      generateOutput();
+      const txt = $('out').textContent;
+      ok('generateOutput uses correct newlines', txt.includes('\nWhat\'s Happening Today:\n'));
+      const lines = txt.split('\n');
+      ok('output has multiple lines', lines.length > 3);
+
+      // Additional tests (do not modify existing ones above)
+      const meetingFile = { type:'meeting', ident:'Dana', when:{day:'today', time:'11:00am'}, purpose:{type:'file', name:'design_system_v3.fig', notes:'레이어 정리'} };
+      ok('toSentence(meeting-file) mentions file', toSentence(meetingFile,'present').includes('about file'));
+
+      const ping = { type:'ping', ident:'Alex from QA', status:'DEF', extra:'by EOD' };
+      ok('toSentence(ping,present) reads naturally', /I\’?m pinging Alex from QA about DEF — by EOD\./.test(toSentence(ping,'present')));
+
+      // UI behavior: status hidden for meeting
+      const tTypeSel = $('t-type');
+      tTypeSel.value = 'meeting';
+      updateIdentityLabels('t');
+      ok('status hidden for Meeting', $('t-status-wrap').style.display === 'none');
+
+      // Restore
+      const restored = JSON.parse(backupState);
+      state.yesterday = restored.yesterday || [];
+      state.today = restored.today || [];
+      $('out').textContent = backupOut;
+
+      resultsEl.innerHTML = logs.join('');
+    }
+
+    // Global controls
+    $('generate').onclick = generateOutput;
+    $('reset-all').onclick = ()=>{ state.yesterday=[]; state.today=[]; save(); renderLists(); generateOutput(); };
+    $('copy-out').onclick = copyOutput;
+    $('run-tests').onclick = runSelfTests;
+
+    // Bind sections
+    bindSection('y','yesterday');
+    bindSection('t','today');
+
+    // Restore from storage
+    load(); renderLists(); const out= localStorage.getItem('standup_out'); if(out) $('out').textContent = out;
+  </script>
 </body>
 </html>
